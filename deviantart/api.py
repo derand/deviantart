@@ -403,6 +403,8 @@ class Api(object):
         })
 
         metadata = []
+        import json
+        print(f'-- {json.dumps(response)}')
 
         for item in response['metadata']:
             m = {}
@@ -824,6 +826,7 @@ class Api(object):
 
         if not username and self.standard_grant_type == "authorization_code":
             response = self._req('/user/whoami')
+            print(f'whoami res: {response}')
             u = User()
             u.from_dict(response)
         else:
@@ -834,8 +837,9 @@ class Api(object):
                     'ext_collections' : ext_collections,
                     'ext_galleries' : ext_galleries
                 })
+                print(f'user res: {response}')
                 u = User()
-                u.from_dict(response['user'])
+                u.from_dict(response)
 
         return u
 
@@ -1762,7 +1766,7 @@ class Api(object):
             request_parameter = endpoint
 
         try:
-            encdata = urlencode(post_data, True).encode('utf-8')
+            encdata = urlencode(post_data, doseq=True).encode('utf-8')
             response = self.oauth.request(request_parameter, data=encdata)
             self._checkResponseForErrors(response)
         except HTTPError as e:
