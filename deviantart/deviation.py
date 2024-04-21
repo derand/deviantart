@@ -39,11 +39,13 @@ class Deviation(object):
         self.motion_book = None
         self.html = None
         self.css = None
+        self._dict = None
     
     def __repr__(self):
         return self.deviationid
 
     def from_dict(self, d):
+        self._dict = d
     
         self.deviationid = d['deviationid']
         self.printid = d['printid']

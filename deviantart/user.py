@@ -21,8 +21,10 @@ class User(object):
         self.stats = None
         self.collections = None
         self.galleries = None
+        self._dict = None
 
     def from_dict(self, d):
+        self._dict = d
         usr = d['user'] if 'user' in d and isinstance(d['user'], dict) else d
 
         self.userid = usr['userid']
@@ -50,6 +52,13 @@ class User(object):
 
         if 'galleries' in d:
             self.galleries = d['galleries']
+
+        # delete 'expensive' tags
+        if 'cover_deviation' in self._dict:
+            del self._dict['cover_deviation']        
+        if 'last_status' in self._dict:
+            del self._dict['last_status']
+
 
     def __repr__(self):
         return self.username

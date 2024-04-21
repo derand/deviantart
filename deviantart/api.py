@@ -48,7 +48,8 @@ class Api(object):
         client_secret,
         redirect_uri="",
         standard_grant_type="client_credentials",
-        scope="browse feed message note stash user user.manage comment.post collection"
+        scope="browse feed message note stash user user.manage comment.post collection",
+        mature_content=False
     ):
 
         """Instantiate Class and create OAuth Client"""
@@ -62,6 +63,8 @@ class Api(object):
         self.redirect_uri = redirect_uri
         self.standard_grant_type = standard_grant_type
         self.scope = scope
+        self.mature_content = mature_content
+
         self.access_token = None
         self.refresh_token = None
 
@@ -403,9 +406,6 @@ class Api(object):
         })
 
         metadata = []
-        import json
-        print(f'-- {json.dumps(response)}')
-
         for item in response['metadata']:
             m = {}
             m['deviationid'] = item['deviationid']
@@ -535,7 +535,8 @@ class Api(object):
                 "calculate_size":calculate_size,
                 "ext_preload":ext_preload,
                 "offset":offset,
-                "limit":limit
+                "limit":limit,
+                'mature_content': self.mature_content,
             })
         else:
             if not username:
@@ -546,7 +547,8 @@ class Api(object):
                     "calculate_size":calculate_size,
                     "ext_preload":ext_preload,
                     "offset":offset,
-                    "limit":limit
+                    "limit":limit,
+                    'mature_content': self.mature_content,
                 })
 
         folders = []
@@ -590,7 +592,8 @@ class Api(object):
         if not username and self.standard_grant_type == "authorization_code":
             response = self._req('/collections/{}'.format(folderid), {
                 "offset":offset,
-                "limit":limit
+                "limit":limit,
+                'mature_content': self.mature_content,
             })
         else:
             if not username:
@@ -599,7 +602,8 @@ class Api(object):
                 response = self._req('/collections/{}'.format(folderid), {
                     "username":username,
                     "offset":offset,
-                    "limit":limit
+                    "limit":limit,
+                    'mature_content': self.mature_content,
                 })
 
         deviations = []
@@ -631,10 +635,10 @@ class Api(object):
         :param folderid: Optional UUID of the Collection folder to add the favourite into
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
-        post_data = {}
+        post_data = { 'mature_content': self.mature_content}
 
         post_data['deviationid'] = deviationid
 
@@ -655,7 +659,7 @@ class Api(object):
         :param folderid: Optional UUID remove from a single collection folder
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         post_data = {}
@@ -743,7 +747,8 @@ class Api(object):
 
         response = self._req('/gallery/all', {'username': username,
                                                'offset': offset,
-                                               'limit': limit})
+                                               'limit': limit,
+                                               'mature_content': self.mature_content})
 
         deviations = []
 
@@ -826,7 +831,6 @@ class Api(object):
 
         if not username and self.standard_grant_type == "authorization_code":
             response = self._req('/user/whoami')
-            print(f'whoami res: {response}')
             u = User()
             u.from_dict(response)
         else:
@@ -835,9 +839,9 @@ class Api(object):
             else:
                 response = self._req('/user/profile/{}'.format(username), {
                     'ext_collections' : ext_collections,
-                    'ext_galleries' : ext_galleries
+                    'ext_galleries' : ext_galleries,
+                    'mature_content': self.mature_content,
                 })
-                print(f'user res: {response}')
                 u = User()
                 u.from_dict(response)
 
@@ -875,7 +879,7 @@ class Api(object):
         :param username: The usernames you want metadata for (max. 50)
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/whois', post_data={
@@ -913,7 +917,7 @@ class Api(object):
         :param username: The username you want to watch
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/friends/watch/{}'.format(username), post_data={
@@ -938,7 +942,7 @@ class Api(object):
         :param username: The username you want to unwatch
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/friends/unwatch/{}'.format(username))
@@ -954,7 +958,7 @@ class Api(object):
         :param username: Check if username is watching you
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/friends/watching/{}'.format(username))
@@ -979,7 +983,7 @@ class Api(object):
 
 
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         post_data = {}
@@ -1016,7 +1020,7 @@ class Api(object):
 
         """Retrieve the dAmn auth token required to connect to the dAmn servers"""
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/damntoken')
@@ -1167,7 +1171,7 @@ class Api(object):
         :param stashid: The stashid of the object you wish to add to the status
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/user/statuses/post', post_data={
@@ -1297,7 +1301,7 @@ class Api(object):
         :param commentid: The commentid you are replying to
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         if comment_type == "profile":
@@ -1333,7 +1337,7 @@ class Api(object):
         :param stack: True to use stacked mode, false to use flat mode
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/feed', {
@@ -1368,7 +1372,7 @@ class Api(object):
         :param stackid: The stack to delete
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/delete', post_data={
@@ -1392,7 +1396,7 @@ class Api(object):
         :param limit: the pagination limit
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/feedback', {
@@ -1429,7 +1433,7 @@ class Api(object):
         :param limit: the pagination limit
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/feedback/{}'.format(stackid), {
@@ -1464,7 +1468,7 @@ class Api(object):
         :param limit: the pagination limit
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/mentions', {
@@ -1500,7 +1504,7 @@ class Api(object):
         :param limit: the pagination limit
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/messages/mentions/{}'.format(stackid), {
@@ -1534,7 +1538,7 @@ class Api(object):
         :param limit: the pagination limit
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes', {
@@ -1582,7 +1586,7 @@ class Api(object):
         :param folderid: The UUID of the note
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/{}'.format(noteid))
@@ -1601,7 +1605,7 @@ class Api(object):
         :param noetid: The UUID of the note that is being responded to
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/send', post_data={
@@ -1633,7 +1637,7 @@ class Api(object):
         :param folderid: The folderid to move notes to
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/move', post_data={
@@ -1652,7 +1656,7 @@ class Api(object):
         :param noteids: The noteids to delete
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/delete', post_data={
@@ -1671,7 +1675,7 @@ class Api(object):
         :param mark_as: Mark notes as (read/unread/starred/notstarred/spam)
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/mark', post_data={
@@ -1687,7 +1691,7 @@ class Api(object):
 
         """Fetch note folders"""
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/folders')
@@ -1704,7 +1708,7 @@ class Api(object):
         :param parentid: The UUID of the parent folder
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/folders/create', post_data={
@@ -1724,7 +1728,7 @@ class Api(object):
         :param folderid: The UUID of the folder to rename
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/folders/rename/{}'.format(folderid), post_data={
@@ -1742,7 +1746,7 @@ class Api(object):
         :param folderid: The UUID of the folder to delete
         """
 
-        if self.standard_grant_type is not "authorization_code":
+        if self.standard_grant_type != "authorization_code":
             raise DeviantartError("Authentication through Authorization Code (Grant Type) is required in order to connect to this endpoint.")
 
         response = self._req('/notes/folders/remove/{}'.format(folderid))
