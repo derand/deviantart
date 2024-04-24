@@ -125,3 +125,7 @@ class Deviation(object):
             
         if 'css' in d:
             self.css = d['css']
+
+    @property
+    def tier_access(self):
+        return self._dict.get('tier_access')
