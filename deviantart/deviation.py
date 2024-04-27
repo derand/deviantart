@@ -127,5 +127,7 @@ class Deviation(object):
             self.css = d['css']
 
     @property
-    def tier_access(self):
-        return self._dict.get('tier_access')
+    def is_locked(self):
+        return self._dict.get('tier_access') == 'locked' or \
+            ('premium_folder_data' in self._dict and isinstance(self._dict['premium_folder_data'], dict) and self._dict['premium_folder_data'].get('has_access') == False)
+
