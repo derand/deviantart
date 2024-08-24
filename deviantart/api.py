@@ -134,12 +134,18 @@ class Api(object):
 
 
 
-    def browse_dailydeviations(self):
+    def browse_dailydeviations(self, dt=None):
 
-        """Retrieves Daily Deviations"""
+        """Retrieves Daily Deviations
 
-        response = self._req('/browse/dailydeviations')
+        :param date: The day to browse, defaults to today (format YYYY-MM-DD)
+        """
 
+        prms = {}
+        if dt:
+            prms['date'] = dt
+
+        response = self._req('/browse/dailydeviations', prms)
 
         deviations = []
         for item in response['results']:
